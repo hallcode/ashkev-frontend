@@ -9,7 +9,6 @@ function App() {
         <Route path="/rsvp/:token" component={Rsvp} />
 
         <Route path="/guests/secret-link" component={GuestList} />
-
         
         <Route path="/">
           404: Invalid page

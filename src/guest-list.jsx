@@ -5,7 +5,6 @@ import { saveAs } from 'file-saver';
 function GuestList(props) {
     const [guests, setGuests] = useState([]);
     const [codeGuest, setCodeGuest] = useState()
-    const [codeString, setCodeString] = useState("")
     const [viewCode, setViewCode] = useState(false)
 
     const form = useRef(null)
@@ -18,6 +17,12 @@ function GuestList(props) {
         fetch("https://ashkev.peterboroughtenants.app/api/guests")
             .then(response => response.json())
             .then(data => setGuests(data))
+    }
+
+    const deleteGuest = (id) => {
+        fetch(`https://ashkev.peterboroughtenants.app/api/guests/${id}`, {
+            method: 'DELETE'
+        }).then(() => getGuests())
     }
 
     const nullifyEmptyStrings = (key, value) => {
@@ -52,16 +57,6 @@ function GuestList(props) {
                 updatedList.push(...guests, data)
                 setGuests(updatedList)
             })
-    }
-
-    const generateCode = (guest) => {
-        let id = guest.id
-        if (guest.linked_to !== null) {
-            id = guest.linked_to
-        }
-        setCodeString(`https://ashkev.peterboroughtenants.app/rsvp/${id}`)
-        setViewCode(true)
-        setCodeGuest(guest)
     }
 
     const downloadCode = () => {
@@ -151,12 +146,15 @@ function GuestList(props) {
                                     {guest.accomodation && "Required"}
                                 </td>
                                 <td className="py-2 px-3 border-b print:hidden">
-                                    <button className="underline hover:text-blue-700" onClick={() => generateCode(guest)}>
+                                    <button className="underline hover:text-blue-700" onClick={() => {
+                                        setCodeGuest(guest)
+                                        setViewCode(true)
+                                    }}>
                                         View
                                     </button>
                                 </td>
                                 <td className="py-2 px-3 border-b print:hidden pr-6">
-                                    <button className="underline hover:text-blue-700">
+                                    <button className="underline hover:text-blue-700" onClick={() => deleteGuest(guest.id)}>
                                         Delete
                                     </button>
                                 </td>
@@ -173,21 +171,19 @@ function GuestList(props) {
             </main>
 
             {viewCode && (
-                <section className="sticky bottom-0 w-full bg-white p-6 border-t-2">
-                    <button className="underline hover:text-blue-700 float-right" onClick={() => setViewCode(false)}>Close</button>
+                <section className="flex sticky bottom-0 w-full bg-white p-6 border-t-2 justify-between items-start">
                     <div className="flex gap-6">
-                        <QRCode
-                            id="the-qr-code"
-                            value={codeString}
-                            size={200}
-                            level={"M"}
-                        />
-                        <aside className="pl-6 border-l">
-                            <button onClick={downloadCode} className="border-b-2 border-green-400 bg-green-200 text-green-900 py-1 hover:bg-green-100 px-3">
+                        <img alt="qr code" src={`https://ashkev.peterboroughtenants.app/api/qr-code/${codeGuest.linked_to || codeGuest.id}`} />
+                        <aside className="pl-6 border-l flex flex-col gap-5">
+                            <a href={`https://ashkev.peterboroughtenants.app/rsvp/${codeGuest.linked_to || codeGuest.id}`} target="_blank" className="block border-b-2 border-blue-400 bg-blue-200 text-blue-900 py-1 hover:bg-blue-100 px-3">
+                                RSVP Page 
+                            </a>
+                            <a href={`https://ashkev.peterboroughtenants.app/api/qr-code/${codeGuest.linked_to || codeGuest.id}`} className="block border-b-2 border-green-400 bg-green-200 text-green-900 py-1 hover:bg-green-100 px-3">
                                 Download
-                            </button>
+                            </a>
                         </aside>
                     </div>
+                    <button className="underline hover:text-blue-700" onClick={() => setViewCode(false)}>Close</button>
                 </section>
             )}
         </React.Fragment>
