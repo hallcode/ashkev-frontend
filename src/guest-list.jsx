@@ -56,18 +56,8 @@ function GuestList(props) {
                 const updatedList = []
                 updatedList.push(...guests, data)
                 setGuests(updatedList)
+                e.target.reset()
             })
-    }
-
-    const downloadCode = () => {
-        let guest = codeGuest
-        let id = guest.id
-        if (guest.linked_to !== null) {
-            id = guest.linked_to
-        }
-
-        let canvas = document.getElementById("the-qr-code")
-        canvas.toBlob(blob => saveAs(blob, `QR_${id}_${guest.last_name.toUpperCase()}.png`))
     }
 
     return (
